@@ -1,0 +1,250 @@
+<!-- ================= MAIN HEADER ================= -->
+<header class="main-header">
+
+  <div class="logo-section">
+    🏥 <span>Hospital Blood Request System</span>
+  </div>
+
+  <div class="header-actions">
+
+    <button class="nav-btn history-btn" (click)="openHistory()">
+      🕒 Request History
+    </button>
+
+    <!-- <button class="nav-btn notify-btn" (click)="toggleNotifications()">
+      🔔
+      <span *ngIf="notificationCount > 0" class="badge">
+        {{ notificationCount }}
+      </span>
+    </button> -->
+
+  </div>
+
+</header>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" *ngIf="showHistory">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h3>📋 All Requests</h3>
+      <button class="close-btn" (click)="closeHistory()">✖</button>
+    </div>
+
+    <table *ngIf="requests.length > 0">
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Blood</th>
+          <th>Units</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let r of requests">
+          <td>{{r.patientName}}</td>
+          <td>{{r.bloodGroup}}</td>
+          <td>{{r.units}}</td>
+          <td>
+            <span class="status"
+              [ngClass]="r.status?.toLowerCase()">
+              {{r.status}}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+<!-- NOTIFICATION POPUP -->
+<!-- NOTIFICATION POPUP -->
+<div class="notification-popup" *ngIf="showNotifications">
+
+  <div class="notification-header">
+    <span>🔔 Notifications</span>
+    
+    <button class="clear-btn"
+            *ngIf="notifications.length > 0"
+            (click)="clearNotifications()">
+      Clear All
+    </button>
+    
+  </div>
+
+  <div class="notification-body">
+
+    <!-- If notifications exist -->
+    <ng-container *ngIf="notifications.length > 0; else noNotification">
+
+      <div *ngFor="let note of notifications"
+           class="notification-item">
+        🔔 {{ note }}
+      </div>
+
+    </ng-container>
+
+    <!-- If no notifications -->
+    <ng-template #noNotification>
+      <div class="no-notification">
+        📭 No notifications available
+      </div>
+    </ng-template>
+
+  </div>
+
+</div>
+
+
+
+
+
+<div class="container">
+
+
+  <div class="form-card">
+
+    <h2>🏥 Hospital Blood Request</h2>
+
+    <form #f="ngForm" (ngSubmit)="submit()" novalidate>
+
+      <div class="form-group">
+        <label>Patient Name</label>
+        <input type="text" name="patientName"
+          [(ngModel)]="form.patientName"
+          #patientName="ngModel"
+          required>
+        <small *ngIf="patientName.invalid && patientName.touched">
+          Patient name is required
+        </small>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" name="age"
+            [(ngModel)]="form.age"
+            #age="ngModel"
+            required min="1"
+            required max="120">
+          <small *ngIf="age.invalid && age.touched">
+            Valid age required
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select name="gender"
+            [(ngModel)]="form.gender"
+            #gender="ngModel"
+            required>
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+          <small *ngIf="gender.invalid && gender.touched">
+            Gender is required
+          </small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Blood Group</label>
+          <select name="bloodGroup"
+            [(ngModel)]="form.bloodGroup"
+            #bloodGroup="ngModel"
+            required>
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>O+</option><option>O-</option>
+            <option>AB+</option><option>AB-</option>
+          </select>
+          <small *ngIf="bloodGroup.invalid && bloodGroup.touched">
+            Blood group required
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Units Required</label>
+          <input type="number" name="units"
+            [(ngModel)]="form.units"
+            #units="ngModel"
+            required min="1"
+            required max="10">
+          <small *ngIf="units.invalid && units.touched">
+            Enter valid units
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Hospital Name</label>
+        <input type="text" name="hospitalName"
+          [(ngModel)]="form.hospitalName"
+          #hospitalName="ngModel"
+          required>
+        <small *ngIf="hospitalName.invalid && hospitalName.touched">
+          Hospital name required
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Hospital Address</label>
+        <textarea name="hospitalAddress"
+          [(ngModel)]="form.hospitalAddress"
+          rows="3"></textarea>
+      </div>
+
+      <button type="button"
+        class="location-btn "
+        (click)="useCurrentLocation()"
+        [disabled]="loadingLocation">
+
+        {{ loadingLocation ? 'Fetching Current Location...' : '📍 Use Current Location' }}
+
+      </button>
+
+      <button type="submit"
+        class="submit-btn"
+        [disabled]="f.invalid">
+
+        Submit Request
+
+      </button>
+
+    </form>
+  </div>
+
+  <!-- History Section -->
+  <!-- <div class="history-card" *ngIf="requests.length > 0">
+    <h3>📋 Request History</h3>
+
+    <table>
+      <tr>
+        <th>Patient</th>
+        <th>Blood</th>
+        <th>Units</th>
+        <th>Status</th>
+      </tr>
+
+      <tr *ngFor="let r of requests">
+        <td>{{r.patientName}}</td>
+        <td>{{r.bloodGroup}}</td>
+        <td>{{r.units}}</td>
+        <td>
+          <span class="status"
+            [ngClass]="r.status?.toLowerCase()">
+            {{r.status}}
+          </span>
+        </td>
+      </tr>
+    </table>
+  </div> -->
+
+</div>
